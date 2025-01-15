@@ -1,11 +1,14 @@
 from functools import wraps
 from datetime import datetime
-from loguru import logger
+from loguru import logger, Catcher
+from types import ModuleType
+from typing import Optional
+from inspect import getmodule
 
 
 def documentation(doc: str) -> callable:
     """
-    This function equipp a function with its documentation provided as a string.
+    This function equip a function with its documentation provided as a string.
         
         Parameters
         ----------
@@ -76,12 +79,14 @@ def time_decor(fun: callable) -> callable:
         raise TypeError(f"'fun' should be callable, got {type(fun)}!")
         
     @wraps(fun)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> any:
 
-        t0 = datetime.now()
-        res = fun(*args, **kwargs)
-        t1 = datetime.now()
-        logger.info(f"{fun.__name__} time execution: {t1-t0}.")
+        t0: datetime.time = datetime.now()
+        res: any = fun(*args, **kwargs)
+        t1: datetime.time = datetime.now()
+        module: Optional[ModuleType] = getmodule(fun)
+        module_path: str = module.__name__ if module else "<Unknown>"
+        logger.info(f"Function `{module_path}.{fun.__qualname__}` time execution: {t1-t0}.")
         return res
     return wrapper
 
@@ -92,7 +97,7 @@ class NameMetaclass(type):
     to decorate the functions that are going to be called. The decorator prints logs with the name
     of executed function.
     """
-    def __new__(cls: type, clsnames: tuple, clsbases: tuple, clsdict: dict, *args, **kwargs):
+    def __new__(cls: type, clsnames: tuple[str, ...], clsbases: tuple[str, ...], clsdict: dict[str, any], *args, **kwargs) -> callable:
         """
         This method is called when a new class is being created.
 
@@ -117,7 +122,7 @@ class NameMetaclass(type):
             The new class.
 
         """
-        new_cls_dict = clsdict
+        new_cls_dict: dict[str, any] = clsdict
         for key, val in clsdict.items():
             if callable(val):
                 new_cls_dict[key] = name_decor(val)
@@ -130,8 +135,8 @@ class TimeMetaclass(type):
     to decorate the functions that are going to be called.
     The decorator prints time of execution of the called method
     """
-    def __new__(cls, clsnames: tuple, clsbases: tuple, clsdict: dict):
-        new_cls_dict = clsdict
+    def __new__(cls, clsnames: tuple[str, ...], clsbases: tuple[str, ...], clsdict: dict[str, any]) -> callable:
+        new_cls_dict: dict[str, any] = clsdict
         for key, val in clsdict.items():
             if callable(val):
                 new_cls_dict[key] = time_decor(val)
@@ -144,7 +149,7 @@ class LoguruMetaclass(type):
     to decorate the functions that are going to be called. The decorator prints logs from the loguru module in case
     of an exception, warnings or errors.
     """
-    def __new__(cls, clsnames, clsbases, clsdict):
+    def __new__(cls, clsnames: tuple[str, ...], clsbases: tuple[str, ...], clsdict: dict[str, any]) -> callable:
         """
         This method is called when a new class is being created.
 
@@ -165,10 +170,10 @@ class LoguruMetaclass(type):
             The new class.
 
         """
-        new_cls_dict = clsdict
+        new_cls_dict: dict[str, any] = clsdict
         for key, val in clsdict.items():
             if callable(val):
-                new_cls_dict[key] = logger.catch(val)
+                new_cls_dict[key]: Catcher = logger.catch(val)
         return super(LoguruMetaclass, cls).__new__(cls, clsnames, clsbases, new_cls_dict)
 
 
@@ -178,12 +183,12 @@ class CallBlockerMetaclass(type):
 
         This metaclass overrides the __call__ method to check if there exists an instance of the class and if not, create it.
     """
-    counter = 0
+    counter: int = 0
 
-    def __new__(cls, clsnames, clsbases, clsdict):
+    def __new__(cls, clsnames: tuple[str, ...], clsbases: tuple[str, ...], clsdict: dict[str, any]) -> callable:
         return super(CallBlockerMetaclass, cls).__new__(cls, clsnames, clsbases, clsdict)
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs) -> callable:
         """
         Call the object instance.
 
