@@ -1,0 +1,22 @@
+Metadata-Version: 2.2
+Name: pytools
+Version: 0.0.1
+Summary: Package containing tools related to configuration files, concurrency management, metaclasses, decorators, SQL connectors, httpx API connectors etc.
+Home-page: https://github.com/dariusz-piekarz/pytools/blob/master/pytools/
+Author: Dariusz Piekarz
+Author-email: darpiekarz@wp.pl
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Dist: aiofiles>=22.1.0
+Requires-Dist: pandas>=1.5.0
+Requires-Dist: loguru>=0.7.2
+Requires-Dist: numpy>=1.1.0
+Requires-Dist: pyodbc>=5.1.0
+Requires-Dist: psycopg2>=2.9.9
+Requires-Dist: httpx>=0.27.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: summary
