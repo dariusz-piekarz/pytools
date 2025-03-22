@@ -1,10 +1,26 @@
-from functools import wraps
+from functools import wraps, reduce
 from datetime import datetime
 from loguru import logger
 from types import ModuleType
-from typing import Optional
+from typing import Optional, Any
 from inspect import getmodule
-from . import color
+from . import color, Functional, Functorial
+
+
+def flow_decorator(*decorators: *tuple[Functorial, ...]) -> Functorial:
+    """
+    Function applies a chain of decorators to a single function.
+
+    :param decorators: a tuple of decorators which arguments are functions and return functions
+    :return: Callable[[Callable[..., Any]], Callable[..., Any]], decorated function
+    """
+
+    def fn_decorator(fun: Functional) -> Functional:
+        @wraps(fun)
+        def inner_wrapper(*args, **kwargs) -> Any:
+            return reduce(lambda f, g: f(g), list(decorators) + [fun])(*args, **kwargs)
+        return inner_wrapper
+    return fn_decorator
 
 
 def documentation(doc: str) -> callable:
@@ -83,13 +99,13 @@ def time_decor(fun: callable) -> callable:
         raise TypeError(f"'fun' should be callable, got {type(fun)}!")
 
     @wraps(fun)
-    def wrapper(*args, **kwargs) -> any:
+    def wrapper(*args: object, **kwargs: object) -> any:
         t0: datetime.time = datetime.now()
         res: any = fun(*args, **kwargs)
         t1: datetime.time = datetime.now()
         module: Optional[ModuleType] = getmodule(fun)
         module_path: str = f"`{module.__name__}.{fun.__qualname__}()`" if module else f"`<Unknown>.{fun.__qualname__}()`"
-        logger.info(f"Function {color.color(module_path, 'red')} time execution: {color.color(t1 - t0, 'yellow')}.")
+        logger.info(f"Function {color.paint(module_path, 'red')} time execution: {color.paint(t1 - t0, 'yellow')}.")
         return res
 
     return wrapper
@@ -107,8 +123,8 @@ class NameMetaclass(type):
         clsnames: str,
         clsbases: tuple[type, ...],
         clsdict: dict[str, any],
-        *args,
-        **kwargs,
+        *args: object,
+        **kwargs: object,
     ) -> callable:
         """
         This method is called when a new class is being created.
@@ -203,7 +219,7 @@ class CallBlockerMetaclass(type):
     def __new__(cls, clsnames: str, clsbases: tuple[type, ...], clsdict: dict[str, any]) -> callable:
         return super(CallBlockerMetaclass, cls).__new__(cls, clsnames, clsbases, clsdict)
 
-    def __call__(cls, *args, **kwargs) -> callable:
+    def __call__(cls, *args: object, **kwargs: object) -> callable:
         """
         Call the object instance.
 

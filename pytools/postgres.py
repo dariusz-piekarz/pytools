@@ -77,6 +77,7 @@ class PostgreAdminConnector:
         Returns:
             None
         """
+
         self.connection = connect(user=user, password=password, host=host, port=port, database=database)
         self.cursor = self.connection.cursor()
         logger.info(f"Connection to {database} database established")
@@ -93,7 +94,8 @@ class PostgreAdminConnector:
         df = DataFrame(record, columns=columns)
         return df.copy(deep=True)
 
-    def query_replace(self, query: str, words_to_replace: dict, to_df: bool = True):
+    def query_replace(self, query: str, words_to_replace: dict[str, str], to_df: bool = True) -> None:
+
         qry = query
         for key, value in words_to_replace.items():
             qry = qry.replace(key, value)
@@ -103,6 +105,7 @@ class PostgreAdminConnector:
             self.execute_query(qry)
 
     def get_col_names(self, table_name: str) -> None:
+
         schema = table_name.split(".")[0]
         table = table_name.split(".")[1]
         self.cursor.execute(
@@ -113,24 +116,28 @@ class PostgreAdminConnector:
         self.tables_columns[table_name] = [row[0] for row in self.cursor.fetchall()]
 
     def get_record_subset(self, table_name: str, col_names: list[str]) -> DataFrame:
+
         if table_name not in self.tables_columns:
             self.get_col_names(table_name)
         cols = ", ".join(['"' + col_name + '"' for col_name in col_names])
         return self.query_to_df(f"SELECT {cols} FROM {table_name};")
 
     def get_record(self, table_name: str, where: dict[str, any]) -> list[tuple[any, ...]]:
+
         key_cond = '"' + list(where.keys())[0] + '"'
         val_cond = "'" + list(where.values())[0] + "'"
         qry = f"SELECT * FROM {table_name} WHERE {key_cond}={val_cond}"
         return self.execute_query(qry)
 
     def get_record_df(self, table_name: str, where: dict[str, any]) -> DataFrame:
+
         key_cond = '"' + list(where.keys())[0] + '"'
         val_cond = "'" + list(where.values())[0] + "'"
         qry = f"SELECT * FROM {table_name} WHERE {key_cond}={val_cond}"
         return self.query_to_df(qry)
 
     def insert_record(self, table_name: str, to_insert: dict[str, any]) -> None:
+
         if table_name not in self.tables_columns:
             self.get_col_names(table_name)
 
@@ -158,6 +165,7 @@ class PostgreAdminConnector:
         self.connection.commit()
 
     def delete_record(self, table_name: str, field_identifier: dict[str, any]) -> None:
+
         field_name = '"' + str(list(field_identifier.keys())[0]) + '"'
         field_value = "'" + str(list(field_identifier.values())[0]) + "'"
 
@@ -166,20 +174,22 @@ class PostgreAdminConnector:
         self.connection.commit()
 
     def delete_record_condition_and(self, table_name: str, field_identifier: dict[str, any]) -> None:
+
         field_names = ['"' + str(list(field_identifier.keys())[i]) + '"' for i in range(2)]
         field_values = ["'" + str(list(field_identifier.values())[i]) + "'" for i in range(2)]
 
-        qry = f"DELETE FROM {table_name} WHERE {field_names[0]}={field_values[0]}" f" AND {field_names[1]}={field_values[1]};"
+        qry = f"DELETE FROM {table_name} WHERE {field_names[0]}={field_values[0]}"\
+              f" AND {field_names[1]}={field_values[1]};"
         self.cursor.execute(qry)
         self.connection.commit()
 
     def terminate_connection(self) -> None:
-        if hasattr(self, "cursor"):
-            if self.cursor:
-                self.cursor.close()
-        if hasattr(self, "connection"):
-            if self.connection:
-                self.connection.close()
+
+        if hasattr(self, "cursor") and self.cursor:
+            self.cursor.close()
+        if hasattr(self, "connection") and self.connection:
+            self.connection.close()
 
     def __del__(self):
+
         self.terminate_connection()

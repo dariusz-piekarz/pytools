@@ -93,6 +93,7 @@ class Color:
         :param bg_rgb: Tuple[int, int, int] - bg color in RGB form
         :return: str - colored string
         """
+
         if not all([is_in_interval(rgb, 0, 255) for rgb in font_rgb]):
             raise ValueError(f"`font_rgb` must be 3-tuple of integer numbers in range [0, 255]. Got {font_rgb}.")
 

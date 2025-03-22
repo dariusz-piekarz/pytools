@@ -1,10 +1,13 @@
 from httpx import AsyncClient, Response
 from loguru import logger
+from typing import Optional
 
 
 @logger.catch
-async def post_request(aclient: AsyncClient, url: str, parameters: any, auth: tuple[str, str] | None = None) -> Response:
-
+async def post_request(aclient: AsyncClient,
+                       url: str,
+                       parameters: any,
+                       auth: Optional[tuple[str, str]] = None) -> Response:
     response: Response
     if auth is None:
         response = await aclient.post(url, json=parameters)
@@ -16,10 +19,10 @@ async def post_request(aclient: AsyncClient, url: str, parameters: any, auth: tu
 
 @logger.catch
 async def get_request(
-    aclient: AsyncClient,
-    base_url: str,
-    parameters: dict[str, str | list[str]],
-    auth: tuple[str, str] | None = None,
+        aclient: AsyncClient,
+        base_url: str,
+        parameters: dict[str, str | list[str]],
+        auth: tuple[str, str] | None = None,
 ) -> Response:
     response: Response
     if auth is None:
@@ -31,10 +34,10 @@ async def get_request(
 
 @logger.catch
 async def put_request(
-    aclient: AsyncClient,
-    base_url: str,
-    parameters: dict[str, str | list[str]],
-    auth: tuple[str, str] | None = None,
+        aclient: AsyncClient,
+        base_url: str,
+        parameters: dict[str, str | list[str]],
+        auth: Optional[tuple[str, str]] = None,
 ) -> Response:
     response: Response
     if auth is None:
@@ -47,10 +50,10 @@ async def put_request(
 
 @logger.catch
 async def patch_request(
-    aclient: AsyncClient,
-    base_url: str,
-    parameters: dict[str, str | list[str]],
-    auth: tuple[str, str] | None = None,
+        aclient: AsyncClient,
+        base_url: str,
+        parameters: dict[str, str | list[str]],
+        auth: Optional[tuple[str, str]] = None,
 ) -> Response:
     response: Response
     if auth is None:
@@ -62,10 +65,10 @@ async def patch_request(
 
 @logger.catch
 async def delete_request(
-    aclient: AsyncClient,
-    url: str,
-    params: dict[str, str],
-    auth: tuple[str, str] | None = None,
+        aclient: AsyncClient,
+        url: str,
+        params: dict[str, str],
+        auth: Optional[tuple[str, str]] = None,
 ) -> Response:
     response: Response
     if auth is None:

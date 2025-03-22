@@ -9,6 +9,7 @@ class Node:
         Initialisation of Node as a self-nested Node class
         :param dt: dictionary with parameters which are going to be transformed to Node class element
         """
+
         if not isinstance(dt, dict):
             raise TypeError("dict type expected.")
 
@@ -26,6 +27,7 @@ class Node:
                None is returned.
         :return: Node: return branch of supernode named 'name_nd'
         """
+
         if name_nd in self.__dict__.keys():
             return getattr(self, name_nd)  # if in the scope of Node 'self' is 'name_nd' then returns self
         else:
@@ -47,6 +49,7 @@ class Node:
         :param nd_name: name of subNode which is going to be dumped to dictionary.
         :return: Node nd_name transformed to dictionary.
         """
+
         if not (isinstance(nd_name, str) or nd_name is None):
             raise TypeError("nd_name should be a string or None type.")
 
@@ -56,12 +59,13 @@ class Node:
 
     def get_parent_node(self, nd_name: str, missing_node: bool = True) -> Optional["Node"]:
         """
-            Returns parent Node of the subNode with a name 'nd_name'
+        Returns parent Node of the subNode with a name 'nd_name'
         :param nd_name: string name of the Node you want to get a parent Node
         :param missing_node: if True and a such branch does not exist, an error is raised, if False,
                then None is returned
         :return: Node - parent node which has a branch 'nd_name'
         """
+
         if not isinstance(nd_name, str):
             raise TypeError("nd_name should be a string")
 
@@ -84,6 +88,7 @@ class Node:
         :param value: replacing value (can be variant object)
         :return: None
         """
+
         temp = self.get_node(nd_name)
         if (not isinstance(temp, Node)) and isinstance(value, type(temp)):
             setattr(self.get_parent_node(nd_name, missing_node=True), nd_name, value)
@@ -95,6 +100,7 @@ class Node:
         :param nd_name: string with a node_name
         :return: None
         """
+
         delattr(self.get_parent_node(nd_name, missing_node=True), nd_name)
 
     def glue_nodes(self, other: "Node", to_glue_nd: str, other_name: str):
@@ -105,6 +111,7 @@ class Node:
         :param other_name: name of the 'other' Node as a branch
         :return: None
         """
+
         if not isinstance(other_name, str):
             raise TypeError("'other_name' should be a string!")
 
@@ -122,6 +129,7 @@ class Node:
         :param path: a string containing a path where Node is going to be saved as json file
         :return: None
         """
+
         with open(path, "w") as file:
             js_dump(self.to_dict(), file)
 
@@ -131,6 +139,7 @@ class Node:
         :param path: a string containing a path where Node is going to be saved as yaml file
         :return: None
         """
+
         with open(path, "w") as file:
             ym_dump(self.to_dict(), file, default_flow_style=False)
 
@@ -151,6 +160,7 @@ def to_dictionary(node: Node, nd_name: str = None) -> dict[str, any]:
     :param nd_name: name of subNode which is going to be dumped to dictionary.
     :return: Node nd_name transformed to dictionary.
     """
+
     if not (isinstance(nd_name, str) or nd_name is None):
         raise TypeError("nd_name should be a string or None type.")
 

@@ -165,7 +165,7 @@ def vectorize_param(fun: callable) -> callable:
 
     @logger.catch
     @wraps(fun)
-    def to_vectorize(obj, **params):
+    def to_vectorize(obj, **params: object):
 
         if isinstance(obj, TYPES):
             return fun(obj, **params)
@@ -210,7 +210,7 @@ def vectorize_multi(fun: callable) -> callable:
 
     @logger.catch
     @wraps(fun)
-    def to_vectorize(*objects):
+    def to_vectorize(*objects: object):
 
         if all_types_same(objects, TYPES):
             return fun(*objects)
@@ -295,7 +295,7 @@ def vectorize_multi_param(fun: callable) -> callable:
 
     @logger.catch
     @wraps(fun)
-    def to_vectorize(*objects, **params):
+    def to_vectorize(*objects: object, **params: object):
 
         if not all([isinstance(param, TYPES) for param in params.values()]):
             raise TypeError(f"Parameters should be of type: {CONTAINER_TYPES}")

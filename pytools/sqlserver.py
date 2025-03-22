@@ -1,6 +1,7 @@
 from pyodbc import Connection, connect
 from pandas import DataFrame, read_sql_query
 from codecs import open
+from typing import Optional
 import re
 from loguru import logger
 
@@ -55,7 +56,7 @@ class SqlServerConnection:
         self.connect_to_db(database, server, driver, authentication, encrypted, tr_conn)
 
     @staticmethod
-    def read_query(query_path: str, words_to_replace: dict[str:any] | None = None) -> str:
+    def read_query(query_path: str, words_to_replace: Optional[dict[str, any]] = None) -> str:
         """
         Reads a query from a file path and replaces specified words with their corresponding values.
 
@@ -107,6 +108,7 @@ class SqlServerConnection:
         Returns:
             None
         """
+
         logger.info(f"Connecting to the database {database} in the server {server}.")
         self.conn = connect(
             f"DRIVER={driver};"
@@ -128,11 +130,12 @@ class SqlServerConnection:
         Returns:
             DataFrame: A pandas DataFrame containing the results of the query.
         """
+
         df = read_sql_query(query, con=self.conn)
         logger.info("Data collected successfully.")
         return df
 
-    def extract_df_from_path(self, query_path: str, words_to_replace: dict[str, any] = None) -> DataFrame:
+    def extract_df_from_path(self, query_path: str, words_to_replace: Optional[dict[str, any]] = None) -> DataFrame:
         """
         Reads a query from a file path, replaces specified words with their corresponding values,
         and extracts data from the SQL Server database using the modified query.
@@ -146,6 +149,7 @@ class SqlServerConnection:
         Returns:
             DataFrame: A pandas DataFrame containing the results of the query.
         """
+
         query = SqlServerConnection.read_query(query_path, words_to_replace)
         df = read_sql_query(query, con=self.conn)
         logger.info(DATA_COLLECTED_SUCCESSFULLY)
@@ -158,6 +162,7 @@ class SqlServerConnection:
         Returns:
             None
         """
+
         self.conn.close()
         logger.info("Connection to server terminated.")
 
@@ -202,6 +207,7 @@ class MSAccessConnection:
         Returns:
             None
         """
+
         self.connect_to_db(dbpath, driver)
 
     def connect_to_db(self, dbpath: str, driver: str) -> None:
@@ -215,6 +221,7 @@ class MSAccessConnection:
         Returns:
             None
         """
+
         logger.info("Connecting to the MS Access database.")
         self.conn = connect(f"DRIVER={driver}; DBQ={dbpath};")
         logger.info("Connection  to the MS Access database established.")
@@ -229,11 +236,12 @@ class MSAccessConnection:
         Returns:
             DataFrame: A pandas DataFrame containing the results of the query.
         """
+
         df = read_sql_query(query, con=self.conn)
         logger.info(DATA_COLLECTED_SUCCESSFULLY)
         return df
 
-    def extract_df_from_path(self, query_path: str, words_to_replace: dict[str, any] = None) -> DataFrame:
+    def extract_df_from_path(self, query_path: str, words_to_replace: Optional[dict[str, any]] = None) -> DataFrame:
         """
         Reads a query from a file path, replaces specified words with their corresponding values,
         and extracts data from the MS Access database using the modified query.
@@ -247,6 +255,7 @@ class MSAccessConnection:
         Returns:
             DataFrame: A pandas DataFrame containing the results of the query.
         """
+
         query = SqlServerConnection.read_query(query_path, words_to_replace)
         df = read_sql_query(query, con=self.conn)
         logger.info(DATA_COLLECTED_SUCCESSFULLY)
@@ -259,5 +268,6 @@ class MSAccessConnection:
         Returns:
             None
         """
+
         self.conn.close()
         logger.info("Connection to MS Access terminated.")

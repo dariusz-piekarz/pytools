@@ -26,6 +26,7 @@ def div_to_subsets(set_to_partition: list[any], length_of_subset: int) -> list[l
     list[list[any]]
         A list of subsets.
     """
+
     return [set_to_partition[i: i + length_of_subset] for i in range(0, len(set_to_partition), length_of_subset)]
 
 
@@ -260,7 +261,7 @@ class ConcurrencyManager:
     def concurrency_manager(
         self,
         args: dict[str, tuple[any]] | dict[str, dict[str, any]],
-        kwargs: dict[str, dict[str:any]] | None = None,
+        kwargs: dict[str, dict[str, any]] | None = None,
     ) -> dict[str, any]:
 
         if (args is not None and kwargs is None) or (
@@ -581,6 +582,7 @@ class MultifunctionConcurrencyManager:
         args: tuple[any] | dict[str, any],
         kwargs: dict[str, any] | None,
     ) -> any:
+
         if isinstance(args, tuple) and isinstance(kwargs, dict):
             return await function(*args, **kwargs)
         else:
@@ -590,21 +592,25 @@ class MultifunctionConcurrencyManager:
                 return await function(**args)
 
 
-def read_csv_file(path: str, *args, **kwargs) -> DataFrame:
+def read_csv_file(path: str, *args: object, **kwargs: object) -> DataFrame:
+
     return read_csv(path, *args, **kwargs)
 
 
 def save_to_csv(df: DataFrame, path: str, *args, **kwargs) -> None:
+
     df.to_csv(path, *args, **kwargs)
 
 
-async def read_csv_file_async(path: str, *args, **kwargs) -> DataFrame:
+async def read_csv_file_async(path: str, *args: object, **kwargs: object) -> DataFrame:
+
     async with open(path, mode="rb") as file:
         content = await file.read()
         return read_csv(BytesIO(content), *args, **kwargs)
 
 
 async def save_to_csv_async(df: DataFrame, path: str, *args, **kwargs) -> None:
+
     bytes_buffer = BytesIO()
     df.to_csv(bytes_buffer, *args, **kwargs)
     bytes_data = bytes_buffer.getvalue()
@@ -614,6 +620,7 @@ async def save_to_csv_async(df: DataFrame, path: str, *args, **kwargs) -> None:
 
 
 def csv_read(engine: str, kwargs: dict[str, dict[str, any]]) -> dict[str, DataFrame]:
+
     if engine == "thread":
         cm = ConcurrencyManager(read_csv_file, engine="thread")
         return cm.concurrency_manager(kwargs)
@@ -628,6 +635,7 @@ def csv_read(engine: str, kwargs: dict[str, dict[str, any]]) -> dict[str, DataFr
 
 
 def csv_write(engine: str, kwargs: dict[str, dict[str, any]]) -> dict[str, DataFrame]:
+
     if engine == "thread":
         cm = ConcurrencyManager(save_to_csv, engine="thread", locker=False)
         return cm.concurrency_manager(kwargs)
